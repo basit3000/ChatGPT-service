@@ -70,14 +70,6 @@ uvicorn app.main:app --reload
 
 This will start the server in development mode. For production use, consider configuring Uvicorn with a production-ready setup.
 
-### 2. Access the API
-
-Once the server is running, you can access the API at:
-
-```bash
-(http://127.0.0.1:8000)
-```
-
 ## Troubleshooting
 
 Common Issues
