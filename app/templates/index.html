@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <title>ChatGPT Query Service</title>
+        <style>
+            body, html {
+              height: 100%;
+              margin: 0;
+              background-color: white;
+              display: flex;
+              flex-direction: column;
+            }
+            .content {
+              flex: 1;
+            }
+            .navbar {
+              background-color: black;
+            }
+            .btn-primary {
+              background-color: black;
+              border-color: red;
+              width: 100px;
+            }
+            .form-label {
+              color: #34568B;
+            }
+            .logo {
+              max-width: 30%;
+              height: auto;
+              padding: 20px;
+            }
+            .footer {
+              color: black;
+              text-align: center;
+              padding: 10px 0;
+              width: 100%;
+            }
+            .form-container {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              flex-direction: column;
+              height: 100%;
+              padding: 20px;
+            }
+            .form-box {
+              width: 100%;
+              max-width: 600px;
+              margin: 10px 0;
+            }
+            .btn-container {
+              text-align: center;
+              margin-top: 20px;
+            }
+          </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+              <a class="navbar-brand mx-auto" href="#">ChatGPT Service</a>
+            </div>
+          </nav>
+        
+          <div class="content">
+            <div class="container form-container">
+              <div class="form-box">
+                <label for="text" class="form-label">Write your query:</label>
+                <textarea id="text" class="form-control" rows="10"></textarea>
+              </div>
+              <div class="form-box">
+                <label for="languages" class="form-label">Languages</label>
+                <input id="languages" class="form-control" type="text" placeholder="Example: English, German, Russian">
+                <small class="form-text text-muted">Get results in different languages, separated by commas.</small>
+              </div>
+              <div class="btn-container">
+                <button class="btn btn-primary" onclick="go()">Go</button>
+              </div>
+            </div>
+          </div>
+        
+          <div class="footer">
+            &copy; 2024 ChatGPT Service
+          </div>
+
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+          <script>
+            async function go() {
+              const text = document.getElementById('text').value;
+              const languagesInput = document.getElementById('languages').value;
+              const languages = languagesInput.split(',').map(lang => lang.trim());  // Convert input string to array
+
+              const payload = {
+                text: text,
+                languages: languages
+              };
+
+              try {
+                const response = await fetch('http://localhost:8000/result', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                alert('Your request has been submitted. ID: ' + result.task_id);
+                window.location.href = '/result/' + result.task_id;
+              } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to submit your request.');
+              }
+            }
+          </script>
+    </body>
+</html>
