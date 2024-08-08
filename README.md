@@ -8,7 +8,6 @@ This project is a ChatGPT service built using FastAPI. Follow the instructions b
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Installation
 
@@ -60,7 +59,7 @@ Replace your_openai_api_key and your_database_url with your actual values.
 
 ## Usage
 
-### 1. Run the FastAPI Server
+### Run the FastAPI Server
 
 To start the FastAPI server, use the following command:
 
