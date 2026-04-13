@@ -4,120 +4,218 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <title>ChatGPT Query Service</title>
-        <style>
-            body, html {
-              height: 100%;
-              margin: 0;
-              background-color: white;
-              display: flex;
-              flex-direction: column;
-            }
-            .content {
-              flex: 1;
-            }
-            .navbar {
-              background-color: black;
-            }
-            .btn-primary {
-              background-color: black;
-              border-color: red;
-              width: 100px;
-            }
-            .form-label {
-              color: #34568B;
-            }
-            .logo {
-              max-width: 30%;
-              height: auto;
-              padding: 20px;
-            }
-            .footer {
-              color: black;
-              text-align: center;
-              padding: 10px 0;
-              width: 100%;
-            }
-            .form-container {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              flex-direction: column;
-              height: 100%;
-              padding: 20px;
-            }
-            .form-box {
-              width: 100%;
-              max-width: 600px;
-              margin: 10px 0;
-            }
-            .btn-container {
-              text-align: center;
-              margin-top: 20px;
-            }
-          </style>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+        <title>Translation Service</title>
+        <link href="/static/styles.css" rel="stylesheet">
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container">
-              <a class="navbar-brand mx-auto" href="#">ChatGPT Service</a>
+        <nav class="navbar navbar-dark">
+            <div class="container d-flex justify-content-between">
+                <a class="navbar-brand" href="/index">
+                    <i class="bi bi-translate"></i>Translation Service
+                </a>
+                <div class="d-flex align-items-center gap-2">
+                    {% if user %}
+                        <a href="/history" class="btn btn-outline-light btn-sm"><i class="bi bi-clock-history me-1"></i>History</a>
+                        <a href="/settings" class="btn btn-outline-light btn-sm"><i class="bi bi-gear me-1"></i>Settings</a>
+                        <span class="text-light small me-1"><i class="bi bi-person-fill me-1"></i>{{ user.username }}</span>
+                        <form action="/logout" method="post" style="display:inline">
+                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                        </form>
+                    {% else %}
+                        <a href="/login" class="btn btn-outline-light btn-sm">Login</a>
+                        <a href="/register" class="btn btn-light btn-sm">Sign Up</a>
+                    {% endif %}
+                </div>
             </div>
-          </nav>
-        
-          <div class="content">
-            <div class="container form-container">
-              <div class="form-box">
-                <label for="text" class="form-label">Write your query:</label>
-                <textarea id="text" class="form-control" rows="10"></textarea>
-              </div>
-              <div class="form-box">
-                <label for="languages" class="form-label">Languages</label>
-                <input id="languages" class="form-control" type="text" placeholder="Example: English, German, Russian">
-                <small class="form-text text-muted">Get results in different languages, separated by commas.</small>
-              </div>
-              <div class="btn-container">
-                <button class="btn btn-primary" onclick="go()">Go</button>
-              </div>
+        </nav>
+
+        <div class="content">
+            <div class="card">
+                <h2>Translate Text</h2>
+                <p class="subtitle">Enter text and choose target languages to get AI-powered translations.</p>
+
+                <div id="alert" class="alert" role="alert">
+                    <i class="bi"></i>
+                    <span id="alert-text"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label for="text" class="form-label">Text to translate</label>
+                    <textarea id="text" class="form-control" rows="6" placeholder="Type or paste the text you want to translate..."></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="languages" class="form-label">Target languages</label>
+                    <input id="languages" class="form-control" type="text" placeholder="e.g. German, French, Spanish">
+                    <div class="form-text">Separate multiple languages with commas.</div>
+                </div>
+                <div class="d-grid">
+                    <button id="submit-btn" class="btn btn-primary" onclick="submitTranslation()">
+                        <span id="btn-text"><i class="bi bi-send me-1"></i>Translate</span>
+                        <span id="btn-spinner" style="display:none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>Translating...
+                        </span>
+                    </button>
+                </div>
+
+                <div id="result-box" class="result-box">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0">Results</h5>
+                        <span id="status-badge" class="status-badge"></span>
+                    </div>
+                    <div id="results-container"></div>
+                </div>
             </div>
-          </div>
-        
-          <div class="footer">
-            &copy; 2024 ChatGPT Service
-          </div>
+        </div>
 
-          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-          <script>
-            async function go() {
-              const text = document.getElementById('text').value;
-              const languagesInput = document.getElementById('languages').value;
-              const languages = languagesInput.split(',').map(lang => lang.trim());  // Convert input string to array
+        <div class="footer">&copy; 2026 Translation Service</div>
 
-              const payload = {
-                text: text,
-                languages: languages
-              };
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            function showAlert(message, type) {
+                const alert = document.getElementById('alert');
+                const alertText = document.getElementById('alert-text');
+                const icon = alert.querySelector('i');
+                alert.className = 'alert alert-' + type + ' show';
+                icon.className = 'bi ' + (type === 'danger' ? 'bi-exclamation-triangle-fill' : type === 'warning' ? 'bi-exclamation-circle-fill' : 'bi-check-circle-fill');
+                alertText.textContent = message;
+            }
 
-              try {
-                const response = await fetch('http://localhost:8000/result', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(payload)
-                });
+            function hideAlert() {
+                document.getElementById('alert').className = 'alert';
+            }
 
-                if (!response.ok) {
-                  throw new Error(`HTTP error! Status: ${response.status}`);
+            function setLoading(loading) {
+                const btn = document.getElementById('submit-btn');
+                document.getElementById('btn-text').style.display = loading ? 'none' : '';
+                document.getElementById('btn-spinner').style.display = loading ? '' : 'none';
+                btn.disabled = loading;
+            }
+
+            function getErrorMessage(status) {
+                const messages = {
+                    400: 'Bad request. Please check your input and try again.',
+                    401: 'Authentication failed. The server\'s API key may be invalid or missing.',
+                    403: 'Access denied. You don\'t have permission to use this service.',
+                    404: 'The requested resource was not found.',
+                    408: 'Request timed out. Please try again.',
+                    422: 'Invalid input. Please check your text and languages.',
+                    429: 'Too many requests. Please wait a moment and try again.',
+                    500: 'Internal server error. Please try again later.',
+                    502: 'Service temporarily unavailable. Please try again later.',
+                    503: 'Service is currently down for maintenance. Please try again later.',
+                };
+                return messages[status] || 'An unexpected error occurred (HTTP ' + status + '). Please try again.';
+            }
+
+            async function submitTranslation() {
+                hideAlert();
+                const text = document.getElementById('text').value.trim();
+                const languagesInput = document.getElementById('languages').value.trim();
+
+                if (!text) {
+                    showAlert('Please enter some text to translate.', 'warning');
+                    return;
+                }
+                if (!languagesInput) {
+                    showAlert('Please specify at least one target language.', 'warning');
+                    return;
                 }
 
-                const result = await response.json();
-                alert('Your request has been submitted. ID: ' + result.task_id);
-                window.location.href = '/result/' + result.task_id;
-              } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to submit your request.');
-              }
+                const languages = languagesInput.split(',').map(l => l.trim()).filter(l => l);
+                setLoading(true);
+
+                try {
+                    const response = await fetch('/result', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text, languages })
+                    });
+
+                    if (!response.ok) {
+                        let detail = getErrorMessage(response.status);
+                        try {
+                            const err = await response.json();
+                            if (err.detail) detail = err.detail;
+                        } catch (_) {}
+                        showAlert(detail, 'danger');
+                        setLoading(false);
+                        return;
+                    }
+
+                    const data = await response.json();
+                    showAlert('Translation submitted! Checking results...', 'success');
+                    pollResults(data.task_id);
+                } catch (error) {
+                    showAlert('Network error. Please check your connection and try again.', 'danger');
+                    setLoading(false);
+                }
             }
-          </script>
+
+            async function pollResults(taskId) {
+                const resultBox = document.getElementById('result-box');
+                const container = document.getElementById('results-container');
+                const badge = document.getElementById('status-badge');
+
+                resultBox.style.display = 'block';
+                badge.className = 'status-badge status-progress';
+                badge.textContent = 'In progress';
+                container.innerHTML = '<div class="text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Waiting for translations...</div>';
+
+                const maxAttempts = 60;
+                for (let i = 0; i < maxAttempts; i++) {
+                    await new Promise(r => setTimeout(r, 2000));
+                    try {
+                        const res = await fetch('/result/' + taskId);
+                        if (!res.ok) {
+                            showAlert(getErrorMessage(res.status), 'danger');
+                            setLoading(false);
+                            return;
+                        }
+                        const data = await res.json();
+
+                        if (data.status !== 'In progress') {
+                            const isFailed = data.status === 'Failed';
+                            const hasErrors = data.status === 'Completed with errors';
+                            badge.className = 'status-badge ' + (isFailed ? 'status-error' : hasErrors ? 'status-error' : 'status-completed');
+                            badge.textContent = data.status;
+                            container.innerHTML = '';
+
+                            if (isFailed && data.results) {
+                                const firstError = Object.values(data.results)[0] || 'Translation failed';
+                                showAlert(firstError, 'danger');
+                            } else {
+                                hideAlert();
+                            }
+
+                            if (data.results && Object.keys(data.results).length > 0) {
+                                for (const [lang, text] of Object.entries(data.results)) {
+                                    const isError = typeof text === 'string' && text.startsWith('Error:');
+                                    container.innerHTML += '<div class="result-lang">' +
+                                        '<div class="lang-name">' + escapeHtml(lang) + '</div>' +
+                                        '<div class="lang-text' + (isError ? ' text-danger' : '') + '">' + escapeHtml(text) + '</div>' +
+                                        '</div>';
+                                }
+                            } else if (isFailed) {
+                                container.innerHTML = '<div class="text-danger">Translation failed. Please try again.</div>';
+                            }
+                            setLoading(false);
+                            return;
+                        }
+                    } catch (_) {}
+                }
+
+                badge.className = 'status-badge status-error';
+                badge.textContent = 'Timeout';
+                container.innerHTML = '<div class="text-muted">Translation is taking longer than expected. Refresh to check again.</div>';
+                setLoading(false);
+            }
+
+            function escapeHtml(str) {
+                const d = document.createElement('div');
+                d.appendChild(document.createTextNode(str));
+                return d.innerHTML;
+            }
+        </script>
     </body>
 </html>

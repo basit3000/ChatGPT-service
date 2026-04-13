@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: chatgpt_service
+      POSTGRES_DB: translation_service
     ports:
       - "5432:5432"
     volumes:
@@ -24,7 +24,7 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/chatgpt_service
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/translation_service
     depends_on:
       db:
         condition: service_healthy

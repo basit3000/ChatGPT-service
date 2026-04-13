@@ -1,6 +1,6 @@
-# ChatGPT Translation Service
+# Translation Service
 
-A FastAPI web service that translates text into multiple languages using the OpenAI ChatGPT API. Translations are processed asynchronously via background tasks and stored in a PostgreSQL database.
+A FastAPI web service that translates text into multiple languages using the LLM APIs. Translations are processed asynchronously via background tasks and stored in a PostgreSQL database.
 
 ## Features
 
@@ -14,7 +14,7 @@ A FastAPI web service that translates text into multiple languages using the Ope
 
 - **Framework:** FastAPI
 - **Database:** PostgreSQL + SQLAlchemy
-- **AI:** OpenAI ChatGPT API (gpt-4o-mini)
+- **AI:** OpenAI API (gpt-4o-mini)
 - **Server:** Uvicorn / Gunicorn
 - **Frontend:** Bootstrap 5
 
@@ -27,7 +27,7 @@ app/
 +-- schemas.py     # Pydantic request/response schemas
 +-- crud.py        # Database CRUD operations
 +-- database.py    # Database connection setup
-+-- utily.py       # OpenAI translation logic
++-- util.py       # OpenAI translation logic
 +-- templates/
     +-- index.html # Web UI
 ```
@@ -45,7 +45,7 @@ app/
 Create a `.env` file in the project root:
 
 ```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/chatgpt_service
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/translation_service
 OPENAI_API_KEY=your-openai-api-key
 ```
 
@@ -53,8 +53,8 @@ OPENAI_API_KEY=your-openai-api-key
 
 ```bash
 # Clone the repository
-git clone https://github.com/basit3000/ChatGPT-service.git
-cd ChatGPT-service
+git clone https://github.com/basit3000/Translation-Service.git
+cd Translation-Service
 
 # Create virtual environment
 python -m venv .venv
@@ -117,7 +117,7 @@ curl http://localhost:8000/result/1
   "results": {
     "German": "Hallo, Welt!",
     "French": "Bonjour, le monde!",
-    "Spanish": "¡Hola, mundo!"
+    "Spanish": "ï¿½Hola, mundo!"
   }
 }
 ```
@@ -131,11 +131,11 @@ FastAPI auto-generates interactive docs:
 
 ## Troubleshooting
 
-- **ModuleNotFoundError** — Make sure all dependencies are installed by running `pip install -r requirements.txt` within the activated virtual environment.
-- **InvalidRequestError** — Check your OpenAI API key and ensure you have the correct permissions.
-- **RateLimitError** — You may have exceeded your API quota. Check your OpenAI account for usage details.
-- **No module named 'openai'** — Verify that `openai` is in `requirements.txt` and installed: `pip install openai`.
-- **Cannot import name 'RateLimitError' from 'openai'** — Ensure you are using a compatible version: `pip install --upgrade openai`.
+- **ModuleNotFoundError** ï¿½ Make sure all dependencies are installed by running `pip install -r requirements.txt` within the activated virtual environment.
+- **InvalidRequestError** ï¿½ Check your OpenAI API key and ensure you have the correct permissions.
+- **RateLimitError** ï¿½ You may have exceeded your API quota. Check your OpenAI account for usage details.
+- **No module named 'openai'** ï¿½ Verify that `openai` is in `requirements.txt` and installed: `pip install openai`.
+- **Cannot import name 'RateLimitError' from 'openai'** ï¿½ Ensure you are using a compatible version: `pip install --upgrade openai`.
 
 ## Contributing
 
